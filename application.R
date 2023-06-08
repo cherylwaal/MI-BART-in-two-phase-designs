@@ -1,17 +1,17 @@
-library(gtsummary)
+#library(gtsummary)
 library(dplyr)
 library(survey)
 library(nhanesA)
 library(mice)
 library(tidyverse)
 library(BART)
-library(mitools)
-library(dbarts)
-library(table1)
-library(kableExtra)
-library(xtable)
-library(egg)
-library(ggridges)
+#library(mitools)
+#library(dbarts)
+#library(table1)
+#library(kableExtra)
+#library(xtable)
+#library(egg)
+#library(ggridges)
 
 ## load data
 {
@@ -46,7 +46,11 @@ library(ggridges)
     mutate(SEQN=as.numeric(SEQN))
   
   dia_o <- nhanes("DIQ_J")
-  dia = dia_o %>% dplyr::select(SEQN,DIQ010,DIQ160,DIQ170,DIQ172) ## DIQ010 - Doctor told you have diabetes DIQ160 - Ever told you have prediabetes DIQ170 - Ever told have health risk for diabetes DIQ172 Feel could be at risk for diabetes
+  dia = dia_o %>% dplyr::select(SEQN,DIQ010,DIQ160,DIQ170,DIQ172) 
+  ## DIQ010 - Doctor told you have diabetes 
+  #DIQ160 - Ever told you have prediabetes 
+  #DIQ170 - Ever told have health risk for diabetes 
+  #DIQ172 Feel could be at risk for diabetes
   dia = dia %>% 
     mutate(
       DIQ160=as.factor(ifelse(is.na(DIQ160),9,DIQ160)),
@@ -70,7 +74,9 @@ library(ggridges)
     select(SEQN,LBDHDDSI) %>% 
     mutate(SEQN=as.numeric(SEQN))
  
-  blood_o <- nhanes("BPQ_J")  ## BPQ020:Ever told you had high blood pressure BPQ080:Doctor told you - high cholesterol level
+  blood_o <- nhanes("BPQ_J")  
+  ## BPQ020:Ever told you had high blood pressure 
+  ## BPQ080:Doctor told you - high cholesterol level
   blood=blood_o %>% 
     select(SEQN,BPQ020) %>% 
     mutate(
@@ -78,7 +84,8 @@ library(ggridges)
       BPQ020=factor(BPQ020,levels = c(1,2,7,9),labels = c(1,0,2,2)),
       SEQN=as.numeric(SEQN))
   
-  alc_o=nhanes("ALQ_J") ## ALQ151 - Ever have 4/5 or more drinks every day? 1: yes 2: no 3: don't know refused or missing
+  alc_o=nhanes("ALQ_J")
+  ## ALQ151 - Ever have 4/5 or more drinks every day? 1: yes 2: no 7/9: don't know refused or missing
   alc=alc_o %>% 
     select(SEQN,ALQ151) %>% 
     mutate(
@@ -87,7 +94,8 @@ library(ggridges)
       SEQN=as.numeric(SEQN)
     ) 
   
-  smoke_o=nhanes("SMQ_J") ## SMQ040 - Do you now smoke cigarettes?
+  smoke_o=nhanes("SMQ_J") 
+  ## SMQ040 - Do you now smoke cigarettes? # 1 Every day 2 someday 3 not at all 7 refused 9 don't know
   smoke=smoke_o %>% dplyr::select(SEQN,SMQ040) %>% 
     mutate(
       SMQ040=as.factor(ifelse(is.na(SMQ040),9,SMQ040)),
