@@ -1,22 +1,14 @@
-#library(gtsummary)
 library(dplyr)
 library(survey)
 library(nhanesA)
 library(mice)
 library(tidyverse)
 library(BART)
-#library(mitools)
-#library(dbarts)
-#library(table1)
-#library(kableExtra)
-#library(xtable)
-#library(egg)
-#library(ggridges)
 
 ## load data
 {
-  demo <- nhanes('DEMO_J')
   
+  demo <-read.csv("demo.csv")
   demo_1 = demo %>% 
     mutate(
       gender_group=factor(RIAGENDR),
@@ -40,13 +32,13 @@ library(BART)
     dplyr::select("SEQN","strata","cluster",ends_with("group"),"cohort_weight")
 
   ## BMI
-  body_measures_o=nhanes("BMX_J")
-  body_measures=body_measures_o%>% 
+  body_measures=read_csv("body_measures.csv")
+  body_measures=body_measures%>% 
     dplyr::select(SEQN,BMXBMI) %>% 
     mutate(SEQN=as.numeric(SEQN))
   
-  dia_o <- nhanes("DIQ_J")
-  dia = dia_o %>% dplyr::select(SEQN,DIQ010,DIQ160,DIQ170,DIQ172) 
+  dia <- read_csv("dia.csv")
+  dia = dia %>% dplyr::select(SEQN,DIQ010,DIQ160,DIQ170,DIQ172) 
   ## DIQ010 - Doctor told you have diabetes 
   #DIQ160 - Ever told you have prediabetes 
   #DIQ170 - Ever told have health risk for diabetes 
@@ -65,28 +57,28 @@ library(BART)
     ) %>% dplyr::select(-DIQ010)
   
   
-  hem_o=nhanes("GHB_J") 
-  hem=hem_o%>% 
+  hem=read_csv("hem.csv")
+  hem=hem%>% 
     mutate(SEQN=as.numeric(SEQN))
   
-  cho_o=nhanes("HDL_J")
-  cho=cho_o %>% 
+  cho=read_csv("cho.csv")
+  cho=cho %>% 
     select(SEQN,LBDHDDSI) %>% 
     mutate(SEQN=as.numeric(SEQN))
  
-  blood_o <- nhanes("BPQ_J")  
+  blood <- read_csv("blood.csv")
   ## BPQ020:Ever told you had high blood pressure 
   ## BPQ080:Doctor told you - high cholesterol level
-  blood=blood_o %>% 
+  blood=blood %>% 
     select(SEQN,BPQ020) %>% 
     mutate(
       BPQ020=as.factor(ifelse(is.na(BPQ020),9,BPQ020)),
       BPQ020=factor(BPQ020,levels = c(1,2,7,9),labels = c(1,0,2,2)),
       SEQN=as.numeric(SEQN))
   
-  alc_o=nhanes("ALQ_J")
+  alc=read_csv("alc.csv")
   ## ALQ151 - Ever have 4/5 or more drinks every day? 1: yes 2: no 7/9: don't know refused or missing
-  alc=alc_o %>% 
+  alc=alc %>% 
     select(SEQN,ALQ151) %>% 
     mutate(
       ALQ151=as.factor(ifelse(is.na(ALQ151),9,ALQ151)),
@@ -94,9 +86,9 @@ library(BART)
       SEQN=as.numeric(SEQN)
     ) 
   
-  smoke_o=nhanes("SMQ_J") 
+  smoke=read_csv("smoke.csv")
   ## SMQ040 - Do you now smoke cigarettes? # 1 Every day 2 someday 3 not at all 7 refused 9 don't know
-  smoke=smoke_o %>% dplyr::select(SEQN,SMQ040) %>% 
+  smoke=smoke %>% dplyr::select(SEQN,SMQ040) %>% 
     mutate(
       SMQ040=as.factor(ifelse(is.na(SMQ040),9,SMQ040)),
       SMQ040=factor(SMQ040,levels = c(1,2,3,7,9),labels = c(1,2,3,4,4)),
@@ -104,8 +96,8 @@ library(BART)
     ) 
 
   ##### fasting glucose level
-  glu_o = nhanes('GLU_J') 
-  glu=glu_o%>% mutate(
+  glu = read_csv("glu.csv")
+  glu=glu%>% mutate(
     sub_cohort_weight=WTSAF2YR,
     SEQN=as.numeric(SEQN)
   ) %>% 
