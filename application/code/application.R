@@ -264,7 +264,7 @@ dat_2=dat_2 %>% mutate(
   max=c(ci_weight[2]*100,ci_bart[2]*100,ci_rbart[2]*100)
   width=c(width_weight*100,width_bart*100,width_rbart*100)
   dat=data.frame(method,mean,min,max,width)
-  
+  dat$method=factor(dat$method,levels = c("WT","MI-BART","MI-rBART"))
   g1=ggplot(dat, aes(x=method, y=mean,group=1)) + 
     geom_errorbar(aes(ymin=min, ymax=max), width=.05) +
     geom_point(size=1)+
