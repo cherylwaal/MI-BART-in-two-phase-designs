@@ -292,7 +292,7 @@ dat_2=dat_2 %>% mutate(
   x1=svyciprop(~diagnosed_diabetes,svy_1)
   mean_benchmark_2=as.vector(x1)
   ci_benchmark_2=as.vector(attr(x1, "ci"))
-  width_benchmark_2=ci_benchmark[2]-ci_benchmark[1]
+  width_benchmark_2=ci_benchmark_2[2]-ci_benchmark_2[1]
 }
 
 ## weights from sub-cohort to population
@@ -448,7 +448,7 @@ dat_2=dat_2 %>% mutate(
   x1=svymean(~LBXGH,svy_1)
   mean_benchmark_3=as.vector(x1)
   ci_benchmark_3=confint(x1)
-  width_benchmark_3=ci_benchmark_5[2]-ci_benchmark_5[1]
+  width_benchmark_3=ci_benchmark_3[2]-ci_benchmark_3[1]
 }
 
 ## weights from sub-cohort to population
@@ -593,7 +593,7 @@ dat_2=dat_2 %>% mutate(
           legend.title = element_text(size=10))+
     ylab("Population Mean of HbA1c")+
     xlab("")+
-    geom_hline(yintercept = mean_benchmark_5,linetype=2)
+    geom_hline(yintercept = mean_benchmark_3,linetype=2)
 
   ggpubr::ggarrange(g1,g2,g3,
                     labels = c("A", "B","C"),
