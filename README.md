@@ -17,7 +17,7 @@ R code and results for simulation studies can be found at the file "simulation",
   4) The file "results" includes all simulation results data.
   
 
-R code for the NHANES data analysis in our manuscript
+R code for the NHANES data analysis in our manuscript can be found at the file "application", where
 
   1) The file "code" includes the R code for conducting the estimation by methods introduced in our main manuscript and plotting the results;
   2) The file "figures" includes all application results figures.
