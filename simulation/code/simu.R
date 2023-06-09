@@ -1,14 +1,13 @@
-### set your local path for "R_pac_2.r"
-path="./"
+
 #### simulation parameters
 multiple_num=c(rep(10,4),rep(20,4),rep(50,4),rep(100,4),rep(500,4),rep(1000,4))
 scenario=rep(c(1,2,3,4),6)
 simu_table=data.frame(multiple_num,scenario)
 
-source(paste(path,"R_pac_2.R",sep=""))
-#finite_pop_norm=generate_pop(seed=1,y_type = 1,num_bin = 10,num_norm = 10)
-#write_csv(finite_pop_norm,"finite_pop_norm.csv")
-finite_pop_norm=read.csv(paste(path,"finite_pop_norm.csv",sep=""))
+### source your local path for "R_pac_2.R"
+source("./simulation/code/R_pac_2.R")
+finite_pop_norm=read_csv("./simulation/data/finite_pop_norm.csv")
+
 simu=function(simu_time=500,scenario,multiple_num,path,finite_pop_norm){
   if(scenario==1){
     num_norm=2;num_bin=3
