@@ -1,8 +1,10 @@
 library(dplyr)
+library(tidyverse)
+library(xtable)
 
 formResult=function(multiple_num,scenario){
   num=which(simu_table$multiple_num==multiple_num&simu_table$scenario==scenario)
-  load(paste("./results/",num,".RData",sep = ""))
+  load(paste("./simulation/results/",num,".RData",sep = ""))
   relative_bias=apply(sapply(out, function(x){
     sapply(x, function(y){
       y$relative_bias
