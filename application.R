@@ -7,7 +7,6 @@ library(BART)
 
 ## load data
 {
-  
   demo <-read.csv("demo.csv")
   demo_1 = demo %>% 
     mutate(
@@ -88,12 +87,13 @@ library(BART)
   
   smoke=read_csv("smoke.csv")
   ## SMQ040 - Do you now smoke cigarettes? # 1 Every day 2 someday 3 not at all 7 refused 9 don't know
-  smoke=smoke %>% dplyr::select(SEQN,SMQ040) %>% 
+  smoke=smoke %>% dplyr::select(SEQN,SMQ040,SMQ020) %>% 
     mutate(
-      SMQ040=as.factor(ifelse(is.na(SMQ040),9,SMQ040)),
+      SMQ040=ifelse(SMQ020==2,3,SMQ040),
+      SMQ040=ifelse(is.na(SMQ040),9,SMQ040),
       SMQ040=factor(SMQ040,levels = c(1,2,3,7,9),labels = c(1,2,3,4,4)),
       SEQN=as.numeric(SEQN)
-    ) 
+    )
 
   ##### fasting glucose level
   glu = read_csv("glu.csv")
@@ -128,6 +128,8 @@ library(BART)
   sub_cohort= sub_cohort %>% 
     mutate(diabetes=ifelse((LBXGLU>=126)|LBXGH>=6.5,1,0)) 
 }
+
+multiple_num=10
 
 ######################## for the undiagnosed_diabetes    #########################
 
@@ -168,7 +170,19 @@ dat_2=cohort_data %>%
          LBXGH=log(LBXGH),
          LBDHDDSI=log(LBDHDDSI))
 
-dat_3=dat_1 %>% dplyr::select(-LBXGLU)
+### predict response rate
+in_sub=ifelse(cohort_data$SEQN %in% sub_cohort$SEQN,1,0)
+
+bartFit = gbart(dat_2,in_sub,dat_2,type = 'pbart',printevery = 10000,mc.cores = 4)
+res_rate=bartFit$prob.test.mean
+##############################################################################
+
+dat_3=dat_1 %>% dplyr::select(-LBXGLU) %>% 
+  mutate(nr_adjustment=log(1/res_rate[which(in_sub==1)]))
+
+dat_2=dat_2 %>% mutate(
+  nr_adjustment=log(1/res_rate)
+)
 
 ## bart
 {
@@ -179,7 +193,6 @@ dat_3=dat_1 %>% dplyr::select(-LBXGLU)
   
   mean_y_post=NULL
   variance_post=NULL
-  multiple_num=10
   multiple_y=seq(1,nrow(dat_4),length.out = multiple_num)
   dat_5=dat_2
   for (j in 1:multiple_num) {
@@ -210,12 +223,11 @@ dat_3=dat_1 %>% dplyr::select(-LBXGLU)
   dat_1$LBXGLU=as.numeric(dat_1$LBXGLU)
   rbartFit <- rbart_vi(LBXGLU ~ . - stra_clus, dat_1, group.by = dat_1$stra_clus,
                        n.samples = 1000L, n.burn = 100L, n.chains = 1L,
-                       n.trees = 100L, n.threads = 4L,keepTrees = TRUE,n.thin = 1)
+                       n.trees = 100L, keepTrees = TRUE,n.thin = 1)
   
   pred=predict(rbartFit,newdata=dat_2,group.by=dat_2$stra_clus)
   dat_4=as.data.frame(pred)
-  
-  multiple_num=10
+
   multiple_y=seq(1,nrow(dat_4),length.out = multiple_num)
   mean_y_post=NULL
   variance_post=NULL
@@ -251,13 +263,6 @@ dat_3=dat_1 %>% dplyr::select(-LBXGLU)
   max=c(ci_weight[2]*100,ci_bart[2]*100,ci_rbart[2]*100)
   width=c(width_weight*100,width_bart*100,width_rbart*100)
   dat=data.frame(method,mean,min,max,width)
-  
-  ## print table
-  dat_diabetes=dat
-  colnames(dat_diabetes)=c("Method","Estimand","Lower bound","Upper bound","Interval Width")
-  print(xtable(dat_diabetes,digits = 4),include.rownames=FALSE)
-  
-  dat$method=factor(dat$method,levels = c("WT","MI-BART","MI-rBART"))
   
   g1=ggplot(dat, aes(x=method, y=mean,group=1)) + 
     geom_errorbar(aes(ymin=min, ymax=max), width=.05) +
@@ -325,7 +330,19 @@ dat_2=cohort_data %>%
          BMXBMI=log(BMXBMI),
          LBDHDDSI=log(LBDHDDSI),
          LBXGH=log(LBXGH))
-dat_3=dat_1 %>% dplyr::select(-diagnosed_diabetes)
+### predict response rate
+in_sub=ifelse(cohort_data$SEQN %in% sub_cohort$SEQN,1,0)
+
+bartFit = gbart(dat_2,in_sub,dat_2,type = 'pbart',printevery = 10000,mc.cores = 4)
+res_rate=bartFit$prob.test.mean
+##############################################################################
+
+dat_3=dat_1 %>% dplyr::select(-diagnosed_diabetes) %>% 
+  mutate(nr_adjustment=log(1/res_rate[which(in_sub==1)]))
+
+dat_2=dat_2 %>% mutate(
+  nr_adjustment=log(1/res_rate)
+)
 
 ## bart prediction of total diabetes in cohort
 {
@@ -334,7 +351,6 @@ dat_3=dat_1 %>% dplyr::select(-diagnosed_diabetes)
                     nskip = 100,ntree=100)
   dat_4=as.data.frame(bartFit_2$prob.test)
   
-  multiple_num=10
   multiple_y=seq(1,nrow(dat_4),length.out = multiple_num)
   mean_y_post=NULL
   variance_post=NULL
@@ -364,11 +380,10 @@ dat_3=dat_1 %>% dplyr::select(-diagnosed_diabetes)
 {
   rbartFit_2 <- rbart_vi(diagnosed_diabetes ~ . - stra_clus, dat_1, group.by = dat_1$stra_clus,
                          n.samples = 1000L, n.burn = 100L, n.chains = 1L,
-                         n.trees = 100L, n.threads = 4L,keepTrees = TRUE,n.thin = 1)
+                         n.trees = 100L,keepTrees = TRUE,n.thin = 1)
   pred_2=predict(rbartFit_2,newdata=dat_2,group.by=dat_2$stra_clus)
   dat_4=as.data.frame(pred_2)
   
-  multiple_num=10
   multiple_y=seq(1,nrow(dat_4),length.out = multiple_num)
   mean_y_post=NULL
   variance_post=NULL
@@ -401,15 +416,10 @@ dat_3=dat_1 %>% dplyr::select(-diagnosed_diabetes)
   max=c(ci_benchmark_2[2]*100,ci_weight_2[2]*100,ci_bart_2[2]*100,ci_rbart_2[2]*100)
   width=c(width_benchmark_2*100,width_weight_2*100,width_bart_2*100,width_rbart_2*100)
   dat=data.frame(method,mean,min,max,width)
- 
-  ## print table
-  dat_diagnosed_diabetes=dat
-  colnames(dat_diagnosed_diabetes)=c("Method","Estimand","Lower bound","Upper bound","Interval Width")
-  print(xtable(dat_diagnosed_diabetes,digits = 4),include.rownames=FALSE)
   
   dat$method=factor(dat$method,levels = c("Benchmark","WT","MI-BART","MI-rBART"))
   
-  g3=ggplot(dat, aes(x=method, y=mean,group=1)) + 
+  g2=ggplot(dat, aes(x=method, y=mean,group=1)) + 
     geom_errorbar(aes(ymin=min, ymax=max), width=.05) +
     geom_point(size=1)+
     theme_classic()+
@@ -474,7 +484,19 @@ dat_2=cohort_data %>%
          BMXBMI=log(BMXBMI),
          LBDHDDSI=log(LBDHDDSI))
 
-dat_3=dat_1 %>% dplyr::select(-LBXGH)
+### predict response rate
+in_sub=ifelse(cohort_data$SEQN %in% sub_cohort$SEQN,1,0)
+
+bartFit = gbart(dat_2,in_sub,dat_2,type = 'pbart',printevery = 10000,mc.cores = 4)
+res_rate=bartFit$prob.test.mean
+##############################################################################
+
+dat_3=dat_1 %>% dplyr::select(-LBXGH) %>% 
+  mutate(nr_adjustment=log(1/res_rate[which(in_sub==1)]))
+
+dat_2=dat_2 %>% mutate(
+  nr_adjustment=log(1/res_rate)
+)
 
 ## bart prediction of total diabetes in cohort
 {
@@ -482,7 +504,6 @@ dat_3=dat_1 %>% dplyr::select(-LBXGH)
                     ntree = 100,mc.cores = 4)
   dat_bart_3=as.data.frame(bartFit_5$yhat.test)
   
-  multiple_num=10
   set.seed(2)
   multiple_y=seq(1,nrow(dat_bart_3),length.out = multiple_num)
   mean_y_post=NULL
@@ -513,11 +534,10 @@ dat_3=dat_1 %>% dplyr::select(-LBXGH)
   dat_1$LBXGH=as.numeric(dat_1$LBXGH)
   rbartFit_3 <- rbart_vi(LBXGH ~ . - stra_clus, dat_1, group.by = dat_1$stra_clus,
                          n.samples = 1000L, n.burn = 100L, n.chains = 1L,
-                         n.trees = 100L, n.threads = 1L,n.thin = 1,keepTrees = TRUE)
+                         n.trees = 100L, n.thin = 1,keepTrees = TRUE)
   pred_3=predict(rbartFit_3,newdata=dat_2,group.by=dat_2$stra_clus)
   dat_rbart_3=as.data.frame(pred_3)
   
-  multiple_num=10
   set.seed(2)
   multiple_y=seq(1,nrow(dat_rbart_3),length.out = multiple_num)
   mean_y_post=NULL
@@ -558,7 +578,7 @@ dat_3=dat_1 %>% dplyr::select(-LBXGH)
   
   dat$method=factor(dat$method,levels = c("Benchmark","WT","MI-BART","MI-rBART"))
   
-  g5=ggplot(dat, aes(x=method, y=mean,group=1)) + 
+  g3=ggplot(dat, aes(x=method, y=mean,group=1)) + 
     geom_errorbar(aes(ymin=min, ymax=max), width=.05) +
     geom_point(size=1)+
     theme_classic()+
@@ -575,7 +595,7 @@ dat_3=dat_1 %>% dplyr::select(-LBXGH)
     xlab("")+
     geom_hline(yintercept = mean_benchmark_5,linetype=2)
 
-  ggpubr::ggarrange(g1,g3,g5,
+  ggpubr::ggarrange(g1,g2,g3,
                     labels = c("A", "B","C"),
                     ncol = 3,nrow = 1,font.label = list(size = 10, face = "bold"))
   ggsave("application_result.png",width = 12, height = 4)
