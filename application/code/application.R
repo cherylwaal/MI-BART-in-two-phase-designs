@@ -188,7 +188,7 @@ dat_2=dat_2 %>% mutate(
 ## bart
 {
   set.seed(1)
-  bartFit = gbart(dat_3,dat_1$LBXGLU,dat_2,type = 'wbart',mc.cores = 4,
+  bartFit = gbart(as.data.frame(dat_3),dat_1$LBXGLU,dat_2,type = 'wbart',mc.cores = 4,
                   nskip = 100,ntree = 100,keepevery = 1)
   dat_4 = as.data.frame(bartFit$yhat.test)
   
@@ -347,7 +347,7 @@ dat_2=dat_2 %>% mutate(
 
 ## bart prediction of total diabetes in cohort
 {
-  bartFit_2 = gbart(dat_3,dat_1$diagnosed_diabetes,dat_2,type = 'pbart',
+  bartFit_2 = gbart(as.data.frame(dat_3),dat_1$diagnosed_diabetes,dat_2,type = 'pbart',
                     mc.cores = 4,keepevery = 1,
                     nskip = 100,ntree=100)
   dat_4=as.data.frame(bartFit_2$prob.test)
@@ -435,7 +435,7 @@ dat_2=dat_2 %>% mutate(
           legend.title = element_text(size=10))+
     ylab("Prevalence of Diagnosed Diabetes (%)")+
     xlab("")+
-    geom_hline(yintercept = mean_benchmark*100,linetype=2)
+    geom_hline(yintercept = mean_benchmark_2*100,linetype=2)
 }
 
 ######################## for the a1c log outcome #########################
@@ -598,7 +598,7 @@ dat_2=dat_2 %>% mutate(
   ggpubr::ggarrange(g1,g2,g3,
                     labels = c("A", "B","C"),
                     ncol = 3,nrow = 1,font.label = list(size = 10, face = "bold"))
-  ggsave("application_result.png",width = 12, height = 4)
+  ggsave("./application/figures/application_result.png",width = 12, height = 4)
 }
 
 {
