@@ -21,4 +21,4 @@ R code for the NHANES data analysis in our manuscript can be found at the file "
 
   1) The file "code" includes the R code for conducting the estimation by methods introduced in our main manuscript and plotting the results;
   2) The file "figures" includes all application results figures.
-  For all the NHANES data used in this analysis, we direct users to \url{https://wwwn.cdc.gov/Nchs/Nhanes/continuousnhanes/default.aspx?BeginYear=2017}, which is freely available but against the use agreement to archive separately.
+  For all the NHANES data used in this analysis, we direct users to https://wwwn.cdc.gov/Nchs/Nhanes/continuousnhanes/default.aspx?BeginYear=2017, which is freely available but against the use agreement to archive separately.
