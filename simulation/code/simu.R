@@ -1,4 +1,3 @@
-
 #### simulation parameters
 multiple_num=c(rep(10,4),rep(20,4),rep(50,4),rep(100,4),rep(500,4),rep(1000,4))
 scenario=rep(c(1,2,3,4),6)
