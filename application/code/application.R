@@ -7,7 +7,7 @@ library(BART)
 
 ## load data
 {
-  demo <-read.csv("demo.csv")
+  demo <-read.csv("./application/data/demo.csv")
   demo_1 = demo %>% 
     mutate(
       gender_group=factor(RIAGENDR),
@@ -31,12 +31,12 @@ library(BART)
     dplyr::select("SEQN","strata","cluster",ends_with("group"),"cohort_weight")
 
   ## BMI
-  body_measures=read_csv("body_measures.csv")
+  body_measures=read_csv("./application/data/body_measures.csv")
   body_measures=body_measures%>% 
     dplyr::select(SEQN,BMXBMI) %>% 
     mutate(SEQN=as.numeric(SEQN))
   
-  dia <- read_csv("dia.csv")
+  dia <- read_csv("./application/data/dia.csv")
   dia = dia %>% dplyr::select(SEQN,DIQ010,DIQ160,DIQ170,DIQ172) 
   ## DIQ010 - Doctor told you have diabetes 
   #DIQ160 - Ever told you have prediabetes 
@@ -56,16 +56,16 @@ library(BART)
     ) %>% dplyr::select(-DIQ010)
   
   
-  hem=read_csv("hem.csv")
+  hem=read_csv("./application/data/hem.csv")
   hem=hem%>% 
     mutate(SEQN=as.numeric(SEQN))
   
-  cho=read_csv("cho.csv")
+  cho=read_csv("./application/data/cho.csv")
   cho=cho %>% 
     select(SEQN,LBDHDDSI) %>% 
     mutate(SEQN=as.numeric(SEQN))
  
-  blood <- read_csv("blood.csv")
+  blood <- read_csv("./application/data/blood.csv")
   ## BPQ020:Ever told you had high blood pressure 
   ## BPQ080:Doctor told you - high cholesterol level
   blood=blood %>% 
@@ -75,7 +75,7 @@ library(BART)
       BPQ020=factor(BPQ020,levels = c(1,2,7,9),labels = c(1,0,2,2)),
       SEQN=as.numeric(SEQN))
   
-  alc=read_csv("alc.csv")
+  alc=read_csv("./application/data/alc.csv")
   ## ALQ151 - Ever have 4/5 or more drinks every day? 1: yes 2: no 7/9: don't know refused or missing
   alc=alc %>% 
     select(SEQN,ALQ151) %>% 
@@ -85,7 +85,7 @@ library(BART)
       SEQN=as.numeric(SEQN)
     ) 
   
-  smoke=read_csv("smoke.csv")
+  smoke=read_csv("./application/data/smoke.csv")
   ## SMQ040 - Do you now smoke cigarettes? # 1 Every day 2 someday 3 not at all 7 refused 9 don't know
   smoke=smoke %>% dplyr::select(SEQN,SMQ040,SMQ020) %>% 
     mutate(
@@ -96,7 +96,7 @@ library(BART)
     )
 
   ##### fasting glucose level
-  glu = read_csv("glu.csv")
+  glu = read_csv("./application/data/glu.csv")
   glu=glu%>% mutate(
     sub_cohort_weight=WTSAF2YR,
     SEQN=as.numeric(SEQN)
@@ -129,7 +129,7 @@ library(BART)
     mutate(diabetes=ifelse((LBXGLU>=126)|LBXGH>=6.5,1,0)) 
 }
 
-multiple_num=10
+multiple_num=50
 
 ######################## for the undiagnosed_diabetes    #########################
 
@@ -458,7 +458,7 @@ dat_2=dat_2 %>% mutate(
   x1=svymean(~LBXGH,svy_1)
   mean_weight_3=as.vector(x1)
   ci_weight_3=confint(x1)
-  width_weight_3=ci_weight_5[2]-ci_weight_5[1]
+  width_weight_3=ci_weight_3[2]-ci_weight_3[1]
 }
 
 dat_1=sub_cohort %>% 
