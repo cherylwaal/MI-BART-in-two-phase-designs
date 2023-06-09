@@ -4,6 +4,7 @@ library(nhanesA)
 library(mice)
 library(tidyverse)
 library(BART)
+library(dbarts)
 
 ## load data
 {
