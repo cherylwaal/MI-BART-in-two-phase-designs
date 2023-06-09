@@ -498,11 +498,10 @@ dat_2=dat_2 %>% mutate(
   nr_adjustment=log(1/res_rate)
 )
 
-## bart prediction of total diabetes in cohort
+## bart prediction of total diabetes in phase-II
 {
-  bartFit_3 = gbart(dat_3,dat_1$LBXGH,dat_2,type = 'wbart',nskip = 100,
-                    ntree = 100,mc.cores = 4)
-  dat_bart_3=as.data.frame(bartFit_5$yhat.test)
+  bartFit_3 = gbart(as.data.frame(dat_3),dat_1$LBXGH,dat_2,type = 'wbart',nskip = 100,ntree = 100,mc.cores = 4)
+  dat_bart_3=as.data.frame(bartFit_3$yhat.test)
   
   set.seed(2)
   multiple_y=seq(1,nrow(dat_bart_3),length.out = multiple_num)
